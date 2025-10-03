@@ -33,10 +33,10 @@
 
     async function init() {
       try {
-        // No payment - fetch outcome directly
+        // Fetch outcome
         const apiResponse = await fetch('https://vallecular-imputatively-memphis.ngrok-free.dev/get-outcome', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
           body: JSON.stringify({ theme, userId })
         });
         const data = await apiResponse.json();
