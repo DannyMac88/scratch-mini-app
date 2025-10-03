@@ -36,14 +36,14 @@
           const response = await window.solana.connect();
           const userWallet = response.publicKey.toString();
 
-          const connection = new Solana.Connection('https://api.mainnet-beta.solana.com', 'confirmed');
-          const housePubkey = new Solana.PublicKey('EkxrH4sq9ezE2EQQcNpB3SxdkfNJvnzfZt9YN799MCPF');
+          const connection = new solanaWeb3.Connection('https://api.mainnet-beta.solana.com', 'confirmed');
+          const housePubkey = new solanaWeb3.PublicKey('EkxrH4sq9ezE2EQQcNpB3SxdkfNJvnzfZt9YN799MCPF');
 
-          const transaction = new Solana.Transaction().add(
-            Solana.SystemProgram.transfer({
+          const transaction = new solanaWeb3.Transaction().add(
+            solanaWeb3.SystemProgram.transfer({
               fromPubkey: response.publicKey,
               toPubkey: housePubkey,
-              lamports: price * Solana.LAMPORTS_PER_SOL,
+              lamports: price * solanaWeb3.LAMPORTS_PER_SOL,
             })
           );
 
