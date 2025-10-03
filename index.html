@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Scratch Card Mini App</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body { margin: 0; background: #f0f0f0; font-family: Arial; text-align: center; }
+    canvas { border: 2px solid #333; background: #ccc; cursor: pointer; }
+    #result { margin-top: 20px; font-size: 20px; color: green; }
+  </style>
+</head>
+<body>
+  <h2>Scratch the Card!</h2>
+  <canvas id="scratch" width="300" height="200"></canvas>
+  <div id="result"></div>
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+
+    const canvas = document.getElementById('scratch');
+    const ctx = canvas.getContext('2d');
+    const resultDiv = document.getElementById('result');
+
+    // Placeholder hidden outcome - in full version, fetch from bot via initData
+    const outcome = 'You Won 0.015 SOL!'; // Will be dynamic
+
+    // Draw hidden outcome
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, 300, 200);
+    ctx.fillStyle = '#000';
+    ctx.font = '20px Arial';
+    ctx.fillText(outcome, 50, 100);
+
+    // Overlay scratch layer
+    ctx.fillStyle = '#999';
+    ctx.fillRect(0, 0, 300, 200);
+
+    let scratching = false;
+
+    const scratch = (x, y) => {
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.beginPath();
+      ctx.arc(x, y, 15, 0, Math.PI * 2);
+      ctx.fill();
+      checkIfRevealed();
+    };
+
+    canvas.addEventListener('mousedown', (e) => scratching = true);
+    canvas.addEventListener('mouseup', (e) => scratching = false);
+    canvas.addEventListener('mousemove', (e) => {
+      if (scratching) scratch(e.offsetX, e.offsetY);
+    });
+
+    canvas.addEventListener('touchstart', (e) => scratching = true);
+    canvas.addEventListener('touchend', (e) => scratching = false);
+    canvas.addEventListener('touchmove', (e) => {
+      if (scratching) {
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        scratch(touch.clientX - rect.left, touch.clientY - rect.top);
+      }
+    });
+
+    // Check if fully revealed (simple timer for now)
+    setTimeout(() => {
+      resultDiv.textContent = outcome;
+      tg.close();
+    }, 15000); // Auto-close after 15s; later based on reveal
+  </script>
+</body>
+</html>
