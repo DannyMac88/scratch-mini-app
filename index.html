@@ -36,7 +36,7 @@
           const response = await window.solana.connect();
           const userWallet = response.publicKey.toString();
 
-          const connection = new solanaWeb3.Connection('https://api.mainnet-beta.solana.com', 'confirmed');
+          const connection = new solanaWeb3.Connection('https://rpc.ankr.com/solana', 'confirmed');
           const housePubkey = new solanaWeb3.PublicKey('EkxrH4sq9ezE2EQQcNpB3SxdkfNJvnzfZt9YN799MCPF');
 
           const transaction = new solanaWeb3.Transaction();
