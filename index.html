@@ -8,10 +8,12 @@
     body { margin: 0; background: #f0f0f0; font-family: Arial; text-align: center; }
     canvas { border: 2px solid #333; background: #ccc; cursor: pointer; }
     #result { margin-top: 20px; font-size: 20px; color: green; }
+    #instructions { margin: 10px; font-size: 16px; color: #333; }
   </style>
 </head>
 <body>
   <h2>Scratch the Card!</h2>
+  <p id="instructions">Scratch the gray area to reveal your win! (Auto-reveals in 10s)</p>
   <canvas id="scratch" width="300" height="200"></canvas>
   <div id="result"></div>
   <script>
@@ -44,6 +46,7 @@
       ctx.beginPath();
       ctx.arc(x, y, 15, 0, Math.PI * 2);
       ctx.fill();
+      checkProgress();
     };
 
     canvas.addEventListener('mousedown', (e) => scratching = true);
@@ -62,11 +65,25 @@
       }
     });
 
+    // Check scratched progress
+    function checkProgress() {
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+      let scratchedPixels = 0;
+      for (let i = 3; i < imageData.length; i += 4) {
+        if (imageData[i] < 255) scratchedPixels++;
+      }
+      const percentage = (scratchedPixels / (canvas.width * canvas.height)) * 100;
+      if (percentage > 70) {
+        resultDiv.textContent = `${multiplier} Win: ${win} SOL`;
+        tg.close();
+      }
+    }
+
     // Auto-reveal after time
     setTimeout(() => {
       resultDiv.textContent = `${multiplier} Win: ${win} SOL`;
       tg.close();
-    }, 15000);
+    }, 10000);
   </script>
 </body>
 </html>
