@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>Scratch Card Mini App</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
   <style>
     body { margin: 0; background: #f0f0f0; font-family: Arial; text-align: center; }
     canvas { border: 2px solid #333; background: #ccc; cursor: pointer; }
@@ -24,42 +23,19 @@
     const resultDiv = document.getElementById('result');
 
     const urlParams = new URLSearchParams(window.location.search);
-    const price = parseFloat(urlParams.get('price')) || 0.01;
-    const theme = urlParams.get('theme') || 'FTX Collapse Card';
-    const userId = urlParams.get('userId') || '';
+    const multiplier = decodeURIComponent(urlParams.get('multiplier') || 'No Win This Time.');
+    const win = urlParams.get('win') || '0';
 
-    let multiplier = 'No Win This Time.';
-    let win = '0';
+    // Draw dynamic outcome
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, 300, 200);
+    ctx.fillStyle = '#000';
+    ctx.font = '20px Arial';
+    ctx.fillText(`${multiplier} Win: ${win} SOL`, 50, 100);
 
-    async function init() {
-      try {
-        // Fetch outcome
-        const apiResponse = await fetch('https://vallecular-imputatively-memphis.ngrok-free.dev/get-outcome', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
-          body: JSON.stringify({ theme, userId })
-        });
-        const data = await apiResponse.json();
-        multiplier = data.multiplier;
-        win = data.win;
-
-        // Draw dynamic outcome
-        ctx.fillStyle = '#fff';
-        ctx.fillRect(0, 0, 300, 200);
-        ctx.fillStyle = '#000';
-        ctx.font = '20px Arial';
-        ctx.fillText(`${multiplier} Win: ${win} SOL`, 50, 100);
-
-        // Scratch layer
-        ctx.fillStyle = '#999';
-        ctx.fillRect(0, 0, 300, 200);
-      } catch (err) {
-        alert('API failed: ' + err.message);
-        tg.close();
-      }
-    }
-
-    init(); // Start on load
+    // Scratch layer
+    ctx.fillStyle = '#999';
+    ctx.fillRect(0, 0, 300, 200);
 
     let scratching = false;
 
