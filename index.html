@@ -39,13 +39,18 @@
           const connection = new solanaWeb3.Connection('https://api.mainnet-beta.solana.com', 'confirmed');
           const housePubkey = new solanaWeb3.PublicKey('EkxrH4sq9ezE2EQQcNpB3SxdkfNJvnzfZt9YN799MCPF');
 
-          const transaction = new solanaWeb3.Transaction().add(
+          const transaction = new solanaWeb3.Transaction();
+
+          transaction.add(
             solanaWeb3.SystemProgram.transfer({
               fromPubkey: response.publicKey,
               toPubkey: housePubkey,
               lamports: price * solanaWeb3.LAMPORTS_PER_SOL,
             })
           );
+
+          transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+          transaction.feePayer = response.publicKey;
 
           const { signature } = await window.solana.signAndSendTransaction(transaction);
           await connection.confirmTransaction({ signature, commitment: 'confirmed' });
