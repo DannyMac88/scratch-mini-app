@@ -26,66 +26,40 @@
     const urlParams = new URLSearchParams(window.location.search);
     const price = parseFloat(urlParams.get('price')) || 0.01;
     const theme = urlParams.get('theme') || 'FTX Collapse Card';
+    const userId = urlParams.get('userId') || '';
 
     let multiplier = 'No Win This Time.';
     let win = '0';
 
     async function init() {
-      if (window.solana && window.solana.isPhantom) {
-        try {
-          const response = await window.solana.connect();
-          const userWallet = response.publicKey.toString();
+      try {
+        // No payment - fetch outcome directly
+        const apiResponse = await fetch('https://vallecular-imputatively-memphis.ngrok-free.dev/get-outcome', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ theme, userId })
+        });
+        const data = await apiResponse.json();
+        multiplier = data.multiplier;
+        win = data.win;
 
-          const connection = new solanaWeb3.Connection('https://solana-mainnet.alchemy.com/v2/2_aT0XNpq-tLPMIr9nnb8', 'confirmed');
-          const housePubkey = new solanaWeb3.PublicKey('EkxrH4sq9ezE2EQQcNpB3SxdkfNJvnzfZt9YN799MCPF');
+        // Draw dynamic outcome
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, 300, 200);
+        ctx.fillStyle = '#000';
+        ctx.font = '20px Arial';
+        ctx.fillText(`${multiplier} Win: ${win} SOL`, 50, 100);
 
-          const transaction = new solanaWeb3.Transaction();
-
-          transaction.add(
-            solanaWeb3.SystemProgram.transfer({
-              fromPubkey: response.publicKey,
-              toPubkey: housePubkey,
-              lamports: price * solanaWeb3.LAMPORTS_PER_SOL,
-            })
-          );
-
-          transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-          transaction.feePayer = response.publicKey;
-
-          const { signature } = await window.solana.signAndSendTransaction(transaction);
-          await connection.confirmTransaction({ signature, commitment: 'confirmed' });
-
-          // Call API for outcome
-          const apiResponse = await fetch('https://vallecular-imputatively-memphis.ngrok-free.dev/get-outcome', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ txSig: signature, theme, userAddress: userWallet })
-          });
-          const data = await apiResponse.json();
-          multiplier = data.multiplier;
-          win = data.win;
-
-          // Draw dynamic outcome
-          ctx.fillStyle = '#fff';
-          ctx.fillRect(0, 0, 300, 200);
-          ctx.fillStyle = '#000';
-          ctx.font = '20px Arial';
-          ctx.fillText(`${multiplier} Win: ${win} SOL`, 50, 100);
-
-          // Scratch layer
-          ctx.fillStyle = '#999';
-          ctx.fillRect(0, 0, 300, 200);
-        } catch (err) {
-          alert('Payment or API failed: ' + err.message);
-          tg.close();
-        }
-      } else {
-        alert('Install Phantom wallet!');
+        // Scratch layer
+        ctx.fillStyle = '#999';
+        ctx.fillRect(0, 0, 300, 200);
+      } catch (err) {
+        alert('API failed: ' + err.message);
         tg.close();
       }
     }
 
-    init(); // Start payment on load
+    init(); // Start on load
 
     let scratching = false;
 
