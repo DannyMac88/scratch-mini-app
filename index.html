@@ -36,7 +36,7 @@
           const response = await window.solana.connect();
           const userWallet = response.publicKey.toString();
 
-          const connection = new solanaWeb3.Connection('https://solana.drpc.org', 'confirmed');
+          const connection = new solanaWeb3.Connection('https://solana-rpc.projectserum.com', 'confirmed');
           const housePubkey = new solanaWeb3.PublicKey('EkxrH4sq9ezE2EQQcNpB3SxdkfNJvnzfZt9YN799MCPF');
 
           const transaction = new solanaWeb3.Transaction();
