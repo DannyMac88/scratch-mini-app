@@ -30,6 +30,7 @@
     const urlParams = new URLSearchParams(window.location.search);
     const multiplier = decodeURIComponent(urlParams.get('multiplier') || 'No Win This Time.');
     const win = urlParams.get('win') || '0';
+    const userId = urlParams.get('userId') || '';
 
     // Draw dynamic outcome
     ctx.fillStyle = '#fff';
@@ -75,20 +76,26 @@
     function checkProgress() {
       const percentage = (scratchedPixels / totalPixels) * 100;
       if (percentage > 70) {
-        resultDiv.textContent = `${multiplier} Win: ${win} SOL`;
-        resultDiv.style.display = 'block';
-        revealBtn.style.display = 'none';
-        setTimeout(() => tg.close(), 5000); // Close after 5s to let user see
+        revealResult();
       } else if (percentage > 50) {
         revealBtn.style.display = 'block';
       }
     }
 
-    revealBtn.addEventListener('click', () => {
+    function revealResult() {
       resultDiv.textContent = `${multiplier} Win: ${win} SOL`;
       resultDiv.style.display = 'block';
-      setTimeout(() => tg.close(), 5000);
-    });
+      revealBtn.style.display = 'none';
+      // Notify bot to send message
+      fetch('https://vallecular-imputatively-memphis.ngrok-free.dev/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, multiplier, win })
+      }).catch(err => console.error('Notify failed: ' + err.message));
+      setTimeout(() => tg.close(), 5000); // Close after 5s
+    }
+
+    revealBtn.addEventListener('click', revealResult);
   </script>
 </body>
 </html>
