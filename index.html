@@ -7,15 +7,17 @@
   <style>
     body { margin: 0; background: #f0f0f0; font-family: Arial; text-align: center; }
     canvas { border: 2px solid #333; background: #ccc; cursor: pointer; }
-    #result { margin-top: 20px; font-size: 20px; color: green; }
+    #result { margin-top: 20px; font-size: 20px; color: green; display: none; }
     #instructions { margin: 10px; font-size: 16px; color: #333; }
+    button { margin-top: 10px; padding: 10px; background: #007bff; color: white; border: none; cursor: pointer; }
   </style>
 </head>
 <body>
   <h2>Scratch the Card!</h2>
-  <p id="instructions">Scratch the gray area to reveal your win! (Auto-reveals in 10s)</p>
+  <p id="instructions">Scratch the gray area to reveal your win! Scratch at least 70% to see the result.</p>
   <canvas id="scratch" width="300" height="200"></canvas>
   <div id="result"></div>
+  <button id="revealBtn" style="display: none;">Reveal Result</button>
   <script>
     const tg = window.Telegram.WebApp;
     tg.ready();
@@ -23,6 +25,7 @@
     const canvas = document.getElementById('scratch');
     const ctx = canvas.getContext('2d');
     const resultDiv = document.getElementById('result');
+    const revealBtn = document.getElementById('revealBtn');
 
     const urlParams = new URLSearchParams(window.location.search);
     const multiplier = decodeURIComponent(urlParams.get('multiplier') || 'No Win This Time.');
@@ -40,12 +43,15 @@
     ctx.fillRect(0, 0, 300, 200);
 
     let scratching = false;
+    let scratchedPixels = 0;
+    const totalPixels = canvas.width * canvas.height;
 
     const scratch = (x, y) => {
       ctx.globalCompositeOperation = 'destination-out';
       ctx.beginPath();
       ctx.arc(x, y, 15, 0, Math.PI * 2);
       ctx.fill();
+      scratchedPixels += Math.PI * 15 * 15; // Approximate scratched area
       checkProgress();
     };
 
@@ -67,23 +73,22 @@
 
     // Check scratched progress
     function checkProgress() {
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-      let scratchedPixels = 0;
-      for (let i = 3; i < imageData.length; i += 4) {
-        if (imageData[i] < 255) scratchedPixels++;
-      }
-      const percentage = (scratchedPixels / (canvas.width * canvas.height)) * 100;
+      const percentage = (scratchedPixels / totalPixels) * 100;
       if (percentage > 70) {
         resultDiv.textContent = `${multiplier} Win: ${win} SOL`;
-        tg.close();
+        resultDiv.style.display = 'block';
+        revealBtn.style.display = 'none';
+        setTimeout(() => tg.close(), 5000); // Close after 5s to let user see
+      } else if (percentage > 50) {
+        revealBtn.style.display = 'block';
       }
     }
 
-    // Auto-reveal after time
-    setTimeout(() => {
+    revealBtn.addEventListener('click', () => {
       resultDiv.textContent = `${multiplier} Win: ${win} SOL`;
-      tg.close();
-    }, 10000);
+      resultDiv.style.display = 'block';
+      setTimeout(() => tg.close(), 5000);
+    });
   </script>
 </body>
 </html>
